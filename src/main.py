@@ -1,24 +1,29 @@
-from signalrcore.hub_connection_builder import HubConnectionBuilder
+"""
+Main application module for managing HVAC operations and sensor data handling.
+"""
+
 import logging
-import requests
 import json
 import time
-
+import requests
+from signalrcore.hub_connection_builder import HubConnectionBuilder
 
 class App:
+    """Main application class for Oxygen CS."""
+
     def __init__(self):
         self._hub_connection = None
-        self.TICKS = 10
+        self.ticks = 10
 
         # To be configured by your team
-        self.HOST = None  # Setup your host here
-        self.TOKEN = None  # Setup your token here
-        self.T_MAX = None  # Setup your max temperature here
-        self.T_MIN = None  # Setup your min temperature here
-        self.DATABASE_URL = None  # Setup your database here
+        self.host = None
+        self.token = None
+        self.t_max = None
+        self.t_min = None
+        self.database_url = None
 
     def __del__(self):
-        if self._hub_connection != None:
+        if self._hub_connection is not None:
             self._hub_connection.stop()
 
     def start(self):
@@ -33,7 +38,7 @@ class App:
         """Configure hub connection and subscribe to sensor data events."""
         self._hub_connection = (
             HubConnectionBuilder()
-            .with_url(f"{self.HOST}/SensorHub?token={self.TOKEN}")
+            .with_url(f"{self.host}/SensorHub?token={self.token}")
             .configure_logging(logging.INFO)
             .with_automatic_reconnect(
                 {
@@ -49,7 +54,7 @@ class App:
         self._hub_connection.on_open(lambda: print("||| Connection opened."))
         self._hub_connection.on_close(lambda: print("||| Connection closed."))
         self._hub_connection.on_error(
-            lambda data: print(f"||| An exception was thrown closed: {data.error}")
+            lambda data: print(f"||| An exception was thrown: {data.error}")
         )
 
     def on_sensor_data_received(self, data):
@@ -60,31 +65,25 @@ class App:
             temperature = float(data[0]["data"])
             self.take_action(temperature)
             self.save_event_to_database(timestamp, temperature)
-        except Exception as err:
-            print(err)
+        except (KeyError, ValueError) as err:
+            print(f"Error processing data: {err}")
 
     def take_action(self, temperature):
         """Take action to HVAC depending on current temperature."""
-        if float(temperature) >= float(self.T_MAX):
+        if float(temperature) >= float(self.t_max):
             self.send_action_to_hvac("TurnOnAc")
-        elif float(temperature) <= float(self.T_MIN):
+        elif float(temperature) <= float(self.t_min):
             self.send_action_to_hvac("TurnOnHeater")
 
     def send_action_to_hvac(self, action):
         """Send action query to the HVAC service."""
-        r = requests.get(f"{self.HOST}/api/hvac/{self.TOKEN}/{action}/{self.TICKS}")
-        details = json.loads(r.text)
+        response = requests.get(f"{self.host}/api/hvac/{self.token}/{action}/{self.ticks}")
+        details = json.loads(response.text)
         print(details, flush=True)
 
-    def save_event_to_database(self, timestamp, temperature):
+    def save_event_to_database(self, _timestamp, _temperature):
         """Save sensor data into database."""
-        try:
-            # To implement
-            pass
-        except requests.exceptions.RequestException as e:
-            # To implement
-            pass
-
+        pass  # To implement
 
 if __name__ == "__main__":
     app = App()

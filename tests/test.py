@@ -1,4 +1,7 @@
-## To Implement
-# tests/test_main.py
+"""
+Test module for example functionalities.
+"""
+
 def test_example():
+    """A simple test to verify the setup."""
     assert True
