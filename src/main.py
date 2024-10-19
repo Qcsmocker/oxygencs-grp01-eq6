@@ -1,26 +1,29 @@
-"""
-Main application module for managing HVAC operations and sensor data handling.
-"""
-
-import logging
 import json
+import threading
 import time
-import requests
-from signalrcore.hub_connection_builder import HubConnectionBuilder
+from datetime import datetime, timezone
+from api.sensor_hub_api import setup_sensor_hub  # Ensure the correct import path for setup_sensor_hub
+from api.hvac_control_api import send_action_to_hvac
+from db.connection import get_db_connection, close_db_connection
+from queries.sensor_data import insert_sensor_data
+from queries.hvac_action import insert_hvac_action
+import os
+from dotenv import load_dotenv
 
 class App:
     """Main application class for Oxygen CS."""
 
     def __init__(self):
-        self._hub_connection = None
+        # Load environment variables from the .env file
+        load_dotenv()
+        self.host = os.getenv("HOST")
+        self.token = os.getenv("TOKEN")
+        self.t_max = float(os.getenv("T_MAX"))
+        self.t_min = float(os.getenv("T_MIN"))
         self.ticks = 10
-
-        # To be configured by your team
-        self.host = None
-        self.token = None
-        self.t_max = None
-        self.t_min = None
-        self.database_url = None
+        self.ac_on = False
+        self.heater_on = False
+        self._hub_connection = None
 
     def __del__(self):
         if self._hub_connection is not None:
@@ -28,62 +31,173 @@ class App:
 
     def start(self):
         """Start Oxygen CS."""
-        self.setup_sensor_hub()
+        self._hub_connection = setup_sensor_hub(self.host, self.token, self.on_sensor_data_received)
         self._hub_connection.start()
+
+        # Start a thread to calculate metrics every minute
+        threading.Thread(target=self.schedule_metrics_collection).start()
+
         print("Press CTRL+C to exit.")
         while True:
             time.sleep(2)
 
-    def setup_sensor_hub(self):
-        """Configure hub connection and subscribe to sensor data events."""
-        self._hub_connection = (
-            HubConnectionBuilder()
-            .with_url(f"{self.host}/SensorHub?token={self.token}")
-            .configure_logging(logging.INFO)
-            .with_automatic_reconnect(
-                {
-                    "type": "raw",
-                    "keep_alive_interval": 10,
-                    "reconnect_interval": 5,
-                    "max_attempts": 999,
-                }
-            )
-            .build()
-        )
-        self._hub_connection.on("ReceiveSensorData", self.on_sensor_data_received)
-        self._hub_connection.on_open(lambda: print("||| Connection opened."))
-        self._hub_connection.on_close(lambda: print("||| Connection closed."))
-        self._hub_connection.on_error(
-            lambda data: print(f"||| An exception was thrown: {data.error}")
-        )
+    def schedule_metrics_collection(self):
+        """Schedule the metrics calculation every minute."""
+        while True:
+            self.calculate_and_insert_metrics()
+            time.sleep(60)  # Wait for 1 minute before the next collection
 
     def on_sensor_data_received(self, data):
-        """Callback method to handle sensor data on reception."""
+        """Callback method to handle sensor data reception."""
         try:
-            print(data[0]["date"] + " --> " + data[0]["data"], flush=True)
             timestamp = data[0]["date"]
             temperature = float(data[0]["data"])
-            self.take_action(temperature)
-            self.save_event_to_database(timestamp, temperature)
+            sensor_event_id = self.save_sensor_event_to_db(timestamp, temperature)
+            self.take_action(temperature, sensor_event_id)
         except (KeyError, ValueError) as err:
-            print(f"Error processing data: {err}")
+            print(f"Error processing sensor data: {err}")
 
-    def take_action(self, temperature):
-        """Take action to HVAC depending on current temperature."""
-        if float(temperature) >= float(self.t_max):
-            self.send_action_to_hvac("TurnOnAc")
-        elif float(temperature) <= float(self.t_min):
-            self.send_action_to_hvac("TurnOnHeater")
+    def save_sensor_event_to_db(self, timestamp, temperature):
+        """Insert sensor data and retrieve sensor_event_id."""
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            insert_sensor_data(cursor, timestamp, temperature)
+            conn.commit()
+            cursor.execute("SELECT LASTVAL();")
+            sensor_event_id = cursor.fetchone()[0]
+            cursor.close()
+            close_db_connection(conn)
+            return sensor_event_id
+        except Exception as e:
+            print(f"Error saving sensor data: {e}")
+            return None
 
-    def send_action_to_hvac(self, action):
-        """Send action query to the HVAC service."""
-        response = requests.get(f"{self.host}/api/hvac/{self.token}/{action}/{self.ticks}")
-        details = json.loads(response.text)
-        print(details, flush=True)
+    def take_action(self, temperature, sensor_event_id):
+        """Determine and execute the appropriate HVAC action."""
+        if temperature < self.t_min:
+            if not self.heater_on:
+                print(f"Temperature {temperature} is below T_MIN: {self.t_min}. Turning on Heater.")
+                self.execute_hvac_action("TurnOnHeater", temperature, sensor_event_id)
+                self.heater_on = True
+            if self.ac_on:
+                print(f"Temperature {temperature} is below T_MIN. Turning off AC.")
+                self.execute_hvac_action("TurnOffAc", temperature, sensor_event_id)
+                self.ac_on = False
+        elif temperature > self.t_max:
+            if not self.ac_on:
+                print(f"Temperature {temperature} exceeds T_MAX. Turning on AC.")
+                self.execute_hvac_action("TurnOnAc", temperature, sensor_event_id)
+                self.ac_on = True
+            if self.heater_on:
+                print(f"Temperature {temperature} exceeds T_MAX. Turning off Heater.")
+                self.execute_hvac_action("TurnOffHeater", temperature, sensor_event_id)
+                self.heater_on = False
+        else:
+            if self.ac_on:
+                print(f"Temperature {temperature} is within the acceptable range. Turning off AC.")
+                self.execute_hvac_action("TurnOffAc", temperature, sensor_event_id)
+                self.ac_on = False
+            if self.heater_on:
+                print(f"Temperature {temperature} is within the acceptable range. Turning off Heater.")
+                self.execute_hvac_action("TurnOffHeater", temperature, sensor_event_id)
+                self.heater_on = False
 
-    def save_event_to_database(self, _timestamp, _temperature):
-        """Save sensor data into database."""
-        pass  # To implement
+    def execute_hvac_action(self, action_type, temperature, sensor_event_id):
+        """Send the action to the HVAC system and save the action to the database."""
+        try:
+            # Send the action to the HVAC system and get the response
+            response_status, response_details = send_action_to_hvac(self.host, self.token, action_type, self.ticks)
+
+            # Convert the response_details dict to a JSON string
+            response_details_json = json.dumps(response_details)
+
+            action_timestamp = datetime.now(timezone.utc)
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            # Insert the HVAC action into the database
+            insert_hvac_action(
+                cursor, 
+                action_timestamp, 
+                action_type, 
+                temperature, 
+                sensor_event_id, 
+                response_status, 
+                response_details_json  # Insert as JSON string
+            )
+
+            conn.commit()
+            cursor.close()
+            close_db_connection(conn)
+
+        except Exception as e:
+            print(f"Error executing HVAC action: {e}")
+
+    def calculate_and_insert_metrics(self):
+        """Calculate and insert integration metrics into the database."""
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            # Calculate the number of sensor events per minute
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM sensor_events
+                WHERE timestamp >= NOW() - INTERVAL '1 minute'
+            """)
+            sensor_events_per_minute = cursor.fetchone()[0]
+
+            # Calculate the number of HVAC actions per minute
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM hvac_actions
+                WHERE action_timestamp >= NOW() - INTERVAL '1 minute'
+            """)
+            hvac_actions_per_minute = cursor.fetchone()[0]
+
+            # Calculate the average sensor temperature for the last minute
+            cursor.execute("""
+                SELECT AVG(temperature)
+                FROM sensor_events
+                WHERE timestamp >= NOW() - INTERVAL '1 minute'
+            """)
+            average_sensor_temperature = cursor.fetchone()[0] or 0  # default to 0 if no data
+
+            # Calculate the average HVAC response time for the last minute
+            cursor.execute("""
+                SELECT AVG(EXTRACT(EPOCH FROM (action_timestamp - sensor_events.timestamp)))
+                FROM hvac_actions
+                JOIN sensor_events ON hvac_actions.sensor_event_id = sensor_events.id
+                WHERE hvac_actions.action_timestamp >= NOW() - INTERVAL '1 minute'
+            """)
+            average_hvac_response_time = cursor.fetchone()[0] or 0  # default to 0 if no data
+
+            # Insert the metrics into the integration_metrics table
+            cursor.execute("""
+                INSERT INTO integration_metrics (
+                    timestamp, 
+                    sensor_events_per_minute, 
+                    hvac_actions_per_minute, 
+                    average_sensor_temperature, 
+                    average_hvac_response_time
+                ) VALUES (%s, %s, %s, %s, %s)
+            """, (
+                datetime.now(), 
+                sensor_events_per_minute, 
+                hvac_actions_per_minute, 
+                average_sensor_temperature, 
+                average_hvac_response_time
+            ))
+
+            conn.commit()
+            cursor.close()
+            close_db_connection(conn)
+
+            print(f"Metrics inserted: {sensor_events_per_minute} sensor events, {hvac_actions_per_minute} HVAC actions, {average_sensor_temperature:.2f}°C avg temp, {average_hvac_response_time:.2f}s avg response time.")
+
+        except Exception as e:
+            print(f"Error calculating and inserting metrics: {e}")
 
 if __name__ == "__main__":
     app = App()
