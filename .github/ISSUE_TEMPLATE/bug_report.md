@@ -8,7 +8,7 @@ assignees: ""
 
 # [BUG] Titre du bug
 
-**Description :**  
+**Description :**
 Une brève description du problème.
 
 ## Étapes à reproduire :

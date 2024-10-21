@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import time
 
+
 class SensorHubConnectionTest(unittest.TestCase):
     """Test connection to the Sensor Hub."""
 
@@ -34,17 +35,21 @@ class SensorHubConnectionTest(unittest.TestCase):
         # Define the event handlers
         self._hub_connection.on_open(lambda: self.set_flag("connection_opened", True))
         self._hub_connection.on_close(lambda: self.set_flag("connection_closed", True))
-        
+
         # Start the connection
         self._hub_connection.start()
         time.sleep(2)  # Give it time to connect
 
         # Assert the connection was opened successfully
-        self.assertTrue(self.connection_opened, "Failed to open connection to Sensor Hub")
+        self.assertTrue(
+            self.connection_opened, "Failed to open connection to Sensor Hub"
+        )
 
         # Stop the connection and assert it closed successfully
         self._hub_connection.stop()
-        self.assertTrue(self.connection_closed, "Failed to close connection to Sensor Hub")
+        self.assertTrue(
+            self.connection_closed, "Failed to close connection to Sensor Hub"
+        )
 
     def set_flag(self, flag_name, value):
         """Helper function to set connection flags."""
@@ -54,6 +59,7 @@ class SensorHubConnectionTest(unittest.TestCase):
         """Stop the hub connection if it's still active."""
         if self._hub_connection:
             self._hub_connection.stop()
+
 
 if __name__ == "__main__":
     unittest.main()

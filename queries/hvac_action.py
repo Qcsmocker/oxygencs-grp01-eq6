@@ -1,4 +1,12 @@
-def insert_hvac_action(cursor, action_timestamp, action_type, temperature, sensor_event_id, response_status, response_details):
+def insert_hvac_action(
+    cursor,
+    action_timestamp,
+    action_type,
+    temperature,
+    sensor_event_id,
+    response_status,
+    response_details,
+):
     """
     Insert HVAC action into the hvac_actions table.
 
@@ -11,4 +19,14 @@ def insert_hvac_action(cursor, action_timestamp, action_type, temperature, senso
     :param response_details: Any details regarding the response (e.g., API response).
     """
     query = """INSERT INTO hvac_actions (action_timestamp, action_type, temperature, sensor_event_id, response_status, response_details) VALUES (%s, %s, %s, %s, %s, %s)"""
-    cursor.execute(query, (action_timestamp, action_type, temperature, sensor_event_id, response_status, response_details))
+    cursor.execute(
+        query,
+        (
+            action_timestamp,
+            action_type,
+            temperature,
+            sensor_event_id,
+            response_status,
+            response_details,
+        ),
+    )

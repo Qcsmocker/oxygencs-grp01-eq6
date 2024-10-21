@@ -1,4 +1,6 @@
-def insert_sensor_data(cursor, timestamp, temperature, sensor_id='sensor-001', status='OK', other_data=None):
+def insert_sensor_data(
+    cursor, timestamp, temperature, sensor_id="sensor-001", status="OK", other_data=None
+):
     """
     Insert sensor data into the sensor_events table.
 

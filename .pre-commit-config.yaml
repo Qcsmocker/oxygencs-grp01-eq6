@@ -13,7 +13,7 @@ repos:
     rev: 23.9.1 # Specify the Black version
     hooks:
       - id: black
-        language_version: python3.9 # Ensure compatibility with your Python version
+        language_version: python3.11 # Ensure compatibility with your Python version
 
   # Pylint for linting Python code
   - repo: https://github.com/PyCQA/pylint

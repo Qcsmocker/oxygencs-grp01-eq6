@@ -8,7 +8,7 @@ assignees: ""
 
 # [PROJECT MANAGEMENT] Titre de la tâche
 
-**Description :**  
+**Description :**
 Une brève description de la tâche de gestion de projet à accomplir (par exemple, configuration de GitHub, création de tâches, configuration de workflows).
 
 ## Objectifs :

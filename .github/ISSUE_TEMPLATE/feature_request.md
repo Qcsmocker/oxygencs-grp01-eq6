@@ -9,7 +9,7 @@ assignees: ''
 
 # [FEATURE] Titre de la fonctionnalité
 
-**Description :**  
+**Description :**
 Une brève description de la fonctionnalité que vous souhaitez ajouter.
 
 ## Objectifs :

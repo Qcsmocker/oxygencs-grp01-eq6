@@ -9,7 +9,7 @@ assignees: ''
 
 # [DOCUMENTATION] Titre du document
 
-**Description :**  
+**Description :**
 Une brève description de la documentation à ajouter ou à mettre à jour.
 
 ## Sections à documenter :

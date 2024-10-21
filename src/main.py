@@ -2,13 +2,16 @@ import json
 import threading
 import time
 from datetime import datetime, timezone
-from api.sensor_hub_api import setup_sensor_hub  # Ensure the correct import path for setup_sensor_hub
+from api.sensor_hub_api import (
+    setup_sensor_hub,
+)  # Ensure the correct import path for setup_sensor_hub
 from api.hvac_control_api import send_action_to_hvac
 from db.connection import get_db_connection, close_db_connection
 from queries.sensor_data import insert_sensor_data
 from queries.hvac_action import insert_hvac_action
 import os
 from dotenv import load_dotenv
+
 
 class App:
     """Main application class for Oxygen CS."""
@@ -31,7 +34,9 @@ class App:
 
     def start(self):
         """Start Oxygen CS."""
-        self._hub_connection = setup_sensor_hub(self.host, self.token, self.on_sensor_data_received)
+        self._hub_connection = setup_sensor_hub(
+            self.host, self.token, self.on_sensor_data_received
+        )
         self._hub_connection.start()
 
         # Start a thread to calculate metrics every minute
@@ -77,7 +82,9 @@ class App:
         """Determine and execute the appropriate HVAC action."""
         if temperature < self.t_min:
             if not self.heater_on:
-                print(f"Temperature {temperature} is below T_MIN: {self.t_min}. Turning on Heater.")
+                print(
+                    f"Temperature {temperature} is below T_MIN: {self.t_min}. Turning on Heater."
+                )
                 self.execute_hvac_action("TurnOnHeater", temperature, sensor_event_id)
                 self.heater_on = True
             if self.ac_on:
@@ -95,11 +102,15 @@ class App:
                 self.heater_on = False
         else:
             if self.ac_on:
-                print(f"Temperature {temperature} is within the acceptable range. Turning off AC.")
+                print(
+                    f"Temperature {temperature} is within the acceptable range. Turning off AC."
+                )
                 self.execute_hvac_action("TurnOffAc", temperature, sensor_event_id)
                 self.ac_on = False
             if self.heater_on:
-                print(f"Temperature {temperature} is within the acceptable range. Turning off Heater.")
+                print(
+                    f"Temperature {temperature} is within the acceptable range. Turning off Heater."
+                )
                 self.execute_hvac_action("TurnOffHeater", temperature, sensor_event_id)
                 self.heater_on = False
 
@@ -107,7 +118,9 @@ class App:
         """Send the action to the HVAC system and save the action to the database."""
         try:
             # Send the action to the HVAC system and get the response
-            response_status, response_details = send_action_to_hvac(self.host, self.token, action_type, self.ticks)
+            response_status, response_details = send_action_to_hvac(
+                self.host, self.token, action_type, self.ticks
+            )
 
             # Convert the response_details dict to a JSON string
             response_details_json = json.dumps(response_details)
@@ -118,13 +131,13 @@ class App:
 
             # Insert the HVAC action into the database
             insert_hvac_action(
-                cursor, 
-                action_timestamp, 
-                action_type, 
-                temperature, 
-                sensor_event_id, 
-                response_status, 
-                response_details_json  # Insert as JSON string
+                cursor,
+                action_timestamp,
+                action_type,
+                temperature,
+                sensor_event_id,
+                response_status,
+                response_details_json,  # Insert as JSON string
             )
 
             conn.commit()
@@ -141,63 +154,81 @@ class App:
             cursor = conn.cursor()
 
             # Calculate the number of sensor events per minute
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(*)
                 FROM sensor_events
                 WHERE timestamp >= NOW() - INTERVAL '1 minute'
-            """)
+            """
+            )
             sensor_events_per_minute = cursor.fetchone()[0]
 
             # Calculate the number of HVAC actions per minute
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(*)
                 FROM hvac_actions
                 WHERE action_timestamp >= NOW() - INTERVAL '1 minute'
-            """)
+            """
+            )
             hvac_actions_per_minute = cursor.fetchone()[0]
 
             # Calculate the average sensor temperature for the last minute
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT AVG(temperature)
                 FROM sensor_events
                 WHERE timestamp >= NOW() - INTERVAL '1 minute'
-            """)
-            average_sensor_temperature = cursor.fetchone()[0] or 0  # default to 0 if no data
+            """
+            )
+            average_sensor_temperature = (
+                cursor.fetchone()[0] or 0
+            )  # default to 0 if no data
 
             # Calculate the average HVAC response time for the last minute
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT AVG(EXTRACT(EPOCH FROM (action_timestamp - sensor_events.timestamp)))
                 FROM hvac_actions
                 JOIN sensor_events ON hvac_actions.sensor_event_id = sensor_events.id
                 WHERE hvac_actions.action_timestamp >= NOW() - INTERVAL '1 minute'
-            """)
-            average_hvac_response_time = cursor.fetchone()[0] or 0  # default to 0 if no data
+            """
+            )
+            average_hvac_response_time = (
+                cursor.fetchone()[0] or 0
+            )  # default to 0 if no data
 
             # Insert the metrics into the integration_metrics table
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO integration_metrics (
-                    timestamp, 
-                    sensor_events_per_minute, 
-                    hvac_actions_per_minute, 
-                    average_sensor_temperature, 
+                    timestamp,
+                    sensor_events_per_minute,
+                    hvac_actions_per_minute,
+                    average_sensor_temperature,
                     average_hvac_response_time
                 ) VALUES (%s, %s, %s, %s, %s)
-            """, (
-                datetime.now(), 
-                sensor_events_per_minute, 
-                hvac_actions_per_minute, 
-                average_sensor_temperature, 
-                average_hvac_response_time
-            ))
+            """,
+                (
+                    datetime.now(),
+                    sensor_events_per_minute,
+                    hvac_actions_per_minute,
+                    average_sensor_temperature,
+                    average_hvac_response_time,
+                ),
+            )
 
             conn.commit()
             cursor.close()
             close_db_connection(conn)
 
-            print(f"Metrics inserted: {sensor_events_per_minute} sensor events, {hvac_actions_per_minute} HVAC actions, {average_sensor_temperature:.2f}°C avg temp, {average_hvac_response_time:.2f}s avg response time.")
+            print(
+                f"Metrics inserted: {sensor_events_per_minute} sensor events, {hvac_actions_per_minute} HVAC actions, {average_sensor_temperature:.2f}°C avg temp, {average_hvac_response_time:.2f}s avg response time."
+            )
 
         except Exception as e:
             print(f"Error calculating and inserting metrics: {e}")
+
 
 if __name__ == "__main__":
     app = App()
