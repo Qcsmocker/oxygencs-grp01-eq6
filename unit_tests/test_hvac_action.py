@@ -1,5 +1,5 @@
 import unittest
-from main import App  # Replace with your actual module
+from main import App
 from unittest.mock import patch
 
 

@@ -1,8 +1,6 @@
-# This section defines general pre-commit hooks for code quality checks
 repos:
-  # Built-in pre-commit hooks like checking trailing whitespace and end-of-file issues
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0 # Use a specific version of the hooks
+    rev: v4.4.0
     hooks:
       - id: trailing-whitespace # Removes trailing whitespace
       - id: end-of-file-fixer # Ensures files end with a single newline
@@ -10,23 +8,23 @@ repos:
 
   # Black for code formatting
   - repo: https://github.com/psf/black
-    rev: 23.9.1 # Specify the Black version
+    rev: 23.9.1
     hooks:
       - id: black
-        language_version: python3.11 # Ensure compatibility with your Python version
+        language_version: python3.11
 
   # Pylint for linting Python code
   - repo: https://github.com/PyCQA/pylint
-    rev: v2.17.5 # Specify the Pylint version
+    rev: v2.17.5
     hooks:
-      - id: pylint # Run Pylint with default configurations
+      - id: pylint
 
-  # Local hook to run unit tests before committing
-  - repo: local # Define a custom local hook
+  # run unit tests before committing
+  - repo: local
     hooks:
-      - id: run-tests # Unique identifier for the hook
-        name: Run Unit Tests # Descriptive name for the hook
+      - id: run-tests
+        name: Run Unit Tests
         entry: pytest # Command to run (pytest in this case)
         language: system
-        pass_filenames: false # Unit tests don't need filenames
-        always_run: true # Ensure this hook always runs
+        pass_filenames: false
+        always_run: true
