@@ -1,5 +1,5 @@
 import unittest
-from main import App
+from app.main import App
 from unittest.mock import patch
 
 

@@ -1,5 +1,5 @@
 import unittest
-from db.connection import get_db_connection, close_db_connection
+from db import get_db_connection, close_db_connection
 
 
 class DatabaseConnectionTest(unittest.TestCase):
