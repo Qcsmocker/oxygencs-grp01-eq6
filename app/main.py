@@ -12,7 +12,6 @@ from queries.hvac_action import insert_hvac_action
 import os
 from dotenv import load_dotenv
 
-
 class App:
     """Main application class for Oxygen CS."""
 
