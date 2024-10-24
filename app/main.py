@@ -2,13 +2,13 @@ import json
 import threading
 import time
 from datetime import datetime, timezone
-from api.sensor_hub_api import (
+from app.api.sensor_hub_api import (
     setup_sensor_hub,
 )  # Ensure the correct import path for setup_sensor_hub
-from api.hvac_control_api import send_action_to_hvac
-from db.connection import get_db_connection, close_db_connection
-from queries.sensor_data import insert_sensor_data
-from queries.hvac_action import insert_hvac_action
+from app.api.hvac_control_api import send_action_to_hvac
+from app.db.connection import get_db_connection, close_db_connection
+from app.queries.sensor_data import insert_sensor_data
+from app.queries.hvac_action import insert_hvac_action
 import os
 from dotenv import load_dotenv
 
