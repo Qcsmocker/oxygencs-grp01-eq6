@@ -1,4 +1,7 @@
 import unittest
+import sys, os
+
+sys.path.append(os.path.abspath("."))
 from main import App
 from unittest.mock import patch
 
