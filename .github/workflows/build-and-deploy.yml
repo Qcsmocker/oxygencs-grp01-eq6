@@ -7,10 +7,28 @@ on:
       - main
 
 jobs:
+  test:
+    timeout-minutes: 10
+    name: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+
+    # install and launch test
+
   build_and_publish:
     timeout-minutes: 10
     name: Build and publish
     runs-on: ubuntu-latest
+
+    needs: ["test"]
 
     steps:
       - name: Checkout code
