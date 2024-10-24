@@ -1,0 +1,6 @@
+tests/
+myenv/
+.github/
+.env
+Dockerfile
+snapshot.py
