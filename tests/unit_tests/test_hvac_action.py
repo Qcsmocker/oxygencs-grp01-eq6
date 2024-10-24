@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append(os.path.abspath('.'))
+
 import unittest
 from app.main import App
 from unittest.mock import patch
