@@ -4,7 +4,7 @@ import sys, os
 sys.path.append(os.path.abspath("."))
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone
-from queries.sensor_data import insert_sensor_data
+from app.queries.sensor_data import insert_sensor_data
 
 
 class TestSensorEventInsertion(unittest.TestCase):
