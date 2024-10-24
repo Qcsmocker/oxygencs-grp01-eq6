@@ -3,7 +3,7 @@ import sys, os
 sys.path.append(os.path.abspath("."))
 
 import unittest
-from app.db import get_db_connection, close_db_connection
+from app.db.connection import get_db_connection, close_db_connection
 
 
 class DatabaseConnectionTest(unittest.TestCase):
