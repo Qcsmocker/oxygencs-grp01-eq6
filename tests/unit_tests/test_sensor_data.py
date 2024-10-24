@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append(os.path.abspath('.'))
+
 import unittest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone
