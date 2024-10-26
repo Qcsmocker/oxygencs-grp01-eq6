@@ -66,9 +66,9 @@ class App:
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
-            insert_sensor_data(cursor, timestamp, temperature)
+            insert_sensor_data(cursor, timestamp, temperature)  # Corrected to match query
             conn.commit()
-            cursor.execute("SELECT LASTVAL();")
+            cursor.execute("SELECT LASTVAL();")  # Get the last inserted sensor_event_id
             sensor_event_id = cursor.fetchone()[0]
             cursor.close()
             close_db_connection(conn)
@@ -76,6 +76,7 @@ class App:
         except Exception as e:
             print(f"Error saving sensor data: {e}")
             return None
+
 
     def take_action(self, temperature, sensor_event_id):
         """Determine and execute the appropriate HVAC action."""
@@ -117,7 +118,7 @@ class App:
         """Send the action to the HVAC system and save the action to the database."""
         try:
             # Send the action to the HVAC system and get the response
-            response_status, response_details = send_action_to_hvac(
+            response_details = send_action_to_hvac(
                 self.host, self.token, action_type, self.ticks
             )
 
@@ -135,8 +136,7 @@ class App:
                 action_type,
                 temperature,
                 sensor_event_id,
-                response_status,
-                response_details_json,  # Insert as JSON string
+                response_details_json
             )
 
             conn.commit()

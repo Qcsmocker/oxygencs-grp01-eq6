@@ -4,7 +4,6 @@ def insert_hvac_action(
     action_type,
     temperature,
     sensor_event_id,
-    response_status,
     response_details,
 ):
     """
@@ -15,10 +14,9 @@ def insert_hvac_action(
     :param action_type: The type of HVAC action (e.g., TurnOnAc).
     :param temperature: The temperature reading at the time of action.
     :param sensor_event_id: The ID of the sensor event associated with this action.
-    :param response_status: The status of the HVAC system response.
     :param response_details: Any details regarding the response (e.g., API response).
     """
-    query = """INSERT INTO hvac_actions (action_timestamp, action_type, temperature, sensor_event_id, response_status, response_details) VALUES (%s, %s, %s, %s, %s, %s)"""
+    query = """INSERT INTO hvac_actions (action_timestamp, action_type, temperature, sensor_event_id, response_details) VALUES (%s, %s, %s, %s, %s)"""
     cursor.execute(
         query,
         (
@@ -26,7 +24,6 @@ def insert_hvac_action(
             action_type,
             temperature,
             sensor_event_id,
-            response_status,
             response_details,
         ),
     )
