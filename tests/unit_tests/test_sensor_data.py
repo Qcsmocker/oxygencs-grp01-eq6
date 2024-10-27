@@ -1,5 +1,6 @@
 import sys, os
-sys.path.append(os.path.abspath('.'))
+
+sys.path.append(os.path.abspath("."))
 
 import unittest
 from unittest.mock import patch, MagicMock

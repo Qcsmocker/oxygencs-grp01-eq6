@@ -1,5 +1,9 @@
-import psycopg2
+"""
+This module provides functions for database connection management.
+"""
+
 import os
+import psycopg2
 from dotenv import load_dotenv
 
 # Load environment variables from the .env file

@@ -1,12 +1,21 @@
-def insert_sensor_data(
-    cursor, timestamp, temperature
-):
+"""
+This module provides database query functions for sensor data.
+"""
+
+from app.queries.data_models import SensorData  # Updated import
+
+def insert_sensor_data(cursor, timestamp, temperature):
     """
-    Insert sensor data into the sensor_events table.
+    Insert sensor data into the database.
 
     :param cursor: Database cursor object.
-    :param timestamp: The time the sensor data was recorded.
-    :param temperature: The temperature reading from the sensor.
+    :param timestamp: Timestamp of the sensor data.
+    :param temperature: Temperature value recorded by the sensor.
     """
-    query = """INSERT INTO sensor_events (timestamp, temperature, sensor_id, status) VALUES (%s, %s)"""
-    cursor.execute(query, (timestamp, temperature))
+    cursor.execute(
+        """
+        INSERT INTO sensor_events (timestamp, temperature)
+        VALUES (%s, %s)
+        """,
+        (timestamp, temperature)
+    )

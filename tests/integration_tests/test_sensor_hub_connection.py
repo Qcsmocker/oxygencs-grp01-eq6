@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import time
 
+
 class SensorHubConnectionTest(unittest.TestCase):
     """Test connection to the Sensor Hub."""
 
