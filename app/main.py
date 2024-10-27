@@ -9,12 +9,18 @@ import time
 from dotenv import load_dotenv
 import json
 
-from app.api.sensor_hub_api import setup_sensor_hub
-from app.api.hvac_control_api import send_action_to_hvac
-from app.queries.data_models import HvacAction
-from app.services.ci_metrics_service import CIMetricsCalculator
-from app.services.database_service import DatabaseService
-from app.utils.datetime_utils import get_current_timestamp
+from .services.database_service import DatabaseService
+
+from .api.sensor_hub_api import setup_sensor_hub
+from .api.hvac_control_api import send_action_to_hvac
+from .queries.data_models import HvacAction
+from .services.ci_metrics_service import CIMetricsCalculator
+from .utils.datetime_utils import get_current_timestamp
+
+# Set the PYTHONPATH
+os.environ["PYTHONPATH"] = os.path.abspath(
+    os.path.dirname(__file__)
+)  # This sets the PYTHONPATH to the current directory.
 
 
 class App:
@@ -64,9 +70,7 @@ class App:
         """Main loop to handle sensor data and HVAC actions without delay."""
         print("Press CTRL+C to exit.")
         self._hub_connection = setup_sensor_hub(
-            self.config["host"],
-            self.config["token"],
-            self.handle_sensor_data
+            self.config["host"], self.config["token"], self.handle_sensor_data
         )
         self._hub_connection.start()
         while True:
@@ -83,10 +87,9 @@ class App:
             temperature = float(data[0]["data"])
 
             # Save sensor data to DB and get the sensor_event_id
-            sensor_event_id = DatabaseService.store_sensor_data({
-                'timestamp': timestamp,
-                'temperature': temperature
-            })
+            sensor_event_id = DatabaseService.store_sensor_data(
+                {"timestamp": timestamp, "temperature": temperature}
+            )
 
             # Determine and perform any necessary HVAC actions
             self.determine_hvac_action(temperature, sensor_event_id)
@@ -101,7 +104,9 @@ class App:
 
         if temperature < t_min:
             if not self.heater_on:
-                print(f"Temperature {temperature} is below T_MIN: {t_min}. Turning on Heater.")
+                print(
+                    f"Temperature {temperature} is below T_MIN: {t_min}. Turning on Heater."
+                )
                 self.perform_hvac_action("TurnOnHeater", temperature, sensor_event_id)
                 self.heater_on = True
             if self.ac_on:
@@ -119,11 +124,15 @@ class App:
                 self.heater_on = False
         else:
             if self.ac_on:
-                print(f"Temperature {temperature} is within the acceptable range. Turning off AC.")
+                print(
+                    f"Temperature {temperature} is within the acceptable range. Turning off AC."
+                )
                 self.perform_hvac_action("TurnOffAc", temperature, sensor_event_id)
                 self.ac_on = False
             if self.heater_on:
-                print(f"Temperature {temperature} is within the acceptable range. Turning off Heater.")
+                print(
+                    f"Temperature {temperature} is within the acceptable range. Turning off Heater."
+                )
                 self.perform_hvac_action("TurnOffHeater", temperature, sensor_event_id)
                 self.heater_on = False
 
@@ -132,10 +141,10 @@ class App:
         try:
             # Send the action to the HVAC system
             response = send_action_to_hvac(
-                self.config["host"], 
-                self.config["token"], 
-                action_type, 
-                self.config["ticks"]
+                self.config["host"],
+                self.config["token"],
+                action_type,
+                self.config["ticks"],
             )
 
             # Check if response is a valid JSON
@@ -154,7 +163,9 @@ class App:
                 action_type=action_type,
                 temperature=temperature,
                 sensor_event_id=sensor_event_id,
-                response_details=json.dumps(response_details)  # Ensure this is a string
+                response_details=json.dumps(
+                    response_details
+                ),  # Ensure this is a string
             )
 
             print(f"Performing HVAC Action: {action_type}")
@@ -164,6 +175,7 @@ class App:
 
         except Exception as e:
             print(f"Error performing HVAC action: {e}")
+
 
 if __name__ == "__main__":
     app = App()

@@ -1,6 +1,6 @@
 # # docker build -t jfkfred/oxygencs .
 # # docker tag jfkfred/oxygencs jfkfred/oxygencs:0.0.1
-# # docker push jfkfred/oxygencs:latest 
+# # docker push jfkfred/oxygencs:latest
 # # docker push jfkfred/oxygencs:0.0.1
 
 # FROM python:3.8-alpine

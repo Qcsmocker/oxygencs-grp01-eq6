@@ -1,6 +1,7 @@
 """
 This module provides database query functions related to HVAC actions.
 """
+
 import requests
 import json
 

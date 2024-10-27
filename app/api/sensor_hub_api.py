@@ -1,6 +1,7 @@
 """
 This module provides an interface for communicating with the sensor hub API.
 """
+
 import requests
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 

@@ -4,13 +4,16 @@ from app.utils.datetime_utils import get_current_timestamp
 from app.services.database_service import DatabaseService
 from app.queries.data_models import HvacAction  # Ensure you have this import
 
+
 class HvacService:
     @staticmethod
     def perform_hvac_action(host, token, action_type, temperature, sensor_event_id):
         """Send the action to the HVAC system and store it."""
         try:
             # Send the action to the HVAC system and get the response
-            response_status, response_details = send_action_to_hvac(host, token, action_type, 10)
+            response_status, response_details = send_action_to_hvac(
+                host, token, action_type, 10
+            )
 
             # Convert response details to a clean JSON string
             response_details_json = json.dumps(response_details, indent=2)

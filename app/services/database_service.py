@@ -1,7 +1,7 @@
-from app.db.connection import close_db_connection, get_db_connection
-from app.queries.sensor_data import insert_sensor_data
-from app.queries.hvac_action import insert_hvac_action
-from app.queries.ci_metrics import insert_ci_metrics
+from ..db.connection import close_db_connection, get_db_connection
+from ..queries.sensor_data import insert_sensor_data
+from ..queries.hvac_action import insert_hvac_action
+from ..queries.ci_metrics import insert_ci_metrics
 
 
 class DatabaseService:
@@ -16,7 +16,9 @@ class DatabaseService:
             cursor = conn.cursor()
 
             # Ensure correct data fields for sensor_data
-            insert_sensor_data(cursor, sensor_data['timestamp'], sensor_data['temperature'])
+            insert_sensor_data(
+                cursor, sensor_data["timestamp"], sensor_data["temperature"]
+            )
 
             cursor.execute("SELECT LASTVAL();")
             sensor_event_id = cursor.fetchone()[0]
@@ -48,7 +50,6 @@ class DatabaseService:
             cursor.execute("SELECT LASTVAL();")
             conn.commit()
 
-
         except Exception as e:
             if conn:
                 conn.rollback()
@@ -69,11 +70,11 @@ class DatabaseService:
             # Ensure correct data fields for ci_metrics
             insert_ci_metrics(
                 cursor,
-                ci_metrics['timestamp'],
-                ci_metrics['build_success_rate'],
-                ci_metrics['average_build_duration'],
-                ci_metrics['tests_executed'],
-                ci_metrics['test_failure_rate']
+                ci_metrics["timestamp"],
+                ci_metrics["build_success_rate"],
+                ci_metrics["average_build_duration"],
+                ci_metrics["tests_executed"],
+                ci_metrics["test_failure_rate"],
             )
 
             cursor.execute("SELECT LASTVAL();")

@@ -4,6 +4,7 @@ This module provides database query functions related to HVAC actions.
 
 from app.queries.data_models import HvacAction  # Updated import
 
+
 def insert_hvac_action(cursor, hvac_action: HvacAction):
     """
     Insert HVAC action into the hvac_actions table.

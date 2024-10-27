@@ -11,6 +11,7 @@ from dataclasses import dataclass
 @dataclass
 class HvacAction:
     """Data class for HVAC action."""
+
     action_timestamp: str
     action_type: str
     temperature: float
@@ -21,6 +22,7 @@ class HvacAction:
 @dataclass
 class SensorData:
     """Data class for sensor data."""
+
     timestamp: str
     temperature: float
 
@@ -28,6 +30,7 @@ class SensorData:
 @dataclass
 class CIMetrics:
     """Data class for CI metrics."""
+
     timestamp: str
     build_success_rate: float
     average_build_duration: float

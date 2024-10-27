@@ -5,12 +5,14 @@ from app.queries.data_models import HvacAction
 from app.queries.hvac_action import insert_hvac_action
 from app.queries.sensor_data import insert_sensor_data
 
+
 @pytest.fixture(scope="module")
 def db_connection():
     # Setup database connection
     connection = get_db_connection()
     yield connection
     connection.close()
+
 
 def test_hvac_action_insertion(db_connection):
     cursor = db_connection.cursor()
@@ -35,8 +37,8 @@ def test_hvac_action_insertion(db_connection):
         action_timestamp=action_timestamp,
         action_type=action_type,
         temperature=temperature,
-        sensor_event_id=sensor_event_id,  # Use the valid sensor_event_id
-        response_details=response_details
+        sensor_event_id=sensor_event_id,
+        response_details=response_details,
     )
 
     # Step 3: Insert HVAC action into the database
@@ -44,14 +46,18 @@ def test_hvac_action_insertion(db_connection):
     db_connection.commit()
 
     # Step 4: Check if the action was inserted
-    cursor.execute("SELECT COUNT(*) FROM hvac_actions WHERE action_type = %s", (action_type,))
+    cursor.execute(
+        "SELECT COUNT(*) FROM hvac_actions WHERE action_timestamp = %s",
+        (action_timestamp,),
+    )
     result = cursor.fetchone()[0]
 
     assert result == 1, "HVAC action not inserted into the database."
 
     # Optional: Verify the action details in the database if needed
-    cursor.execute("SELECT * FROM hvac_actions WHERE action_type = %s", (action_type,))
+    cursor.execute(
+        "SELECT * FROM hvac_actions WHERE action_timestamp = %s", (action_timestamp,)
+    )
     action_record = cursor.fetchone()
     assert action_record is not None, "No action record found in the database."
     assert action_record[1] == action_timestamp, "Action timestamp does not match."
-

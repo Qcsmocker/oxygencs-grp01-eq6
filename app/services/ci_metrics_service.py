@@ -3,6 +3,7 @@ from app.db.connection import get_db_connection, close_db_connection
 from app.utils.ci_metrics_calculations import CIMetricsCalculator
 from app.utils.datetime_utils import get_current_timestamp
 
+
 class CIMetricsService:
     """Service class for interacting with CI metrics in the database."""
 
@@ -15,10 +16,20 @@ class CIMetricsService:
             current_time = get_current_timestamp()
 
             # Calculate metrics using the calculator
-            build_success_rate = CIMetricsCalculator.calculate_build_success_rate(cursor, current_time)
-            average_build_duration = CIMetricsCalculator.calculate_average_build_duration(cursor, current_time)
-            tests_executed = CIMetricsCalculator.calculate_tests_executed(cursor, current_time)
-            test_failure_rate = CIMetricsCalculator.calculate_test_failure_rate(cursor, current_time)
+            build_success_rate = CIMetricsCalculator.calculate_build_success_rate(
+                cursor, current_time
+            )
+            average_build_duration = (
+                CIMetricsCalculator.calculate_average_build_duration(
+                    cursor, current_time
+                )
+            )
+            tests_executed = CIMetricsCalculator.calculate_tests_executed(
+                cursor, current_time
+            )
+            test_failure_rate = CIMetricsCalculator.calculate_test_failure_rate(
+                cursor, current_time
+            )
 
             # Insert the updated metrics back to the database
             cursor.execute(
@@ -31,7 +42,13 @@ class CIMetricsService:
                     test_failure_rate
                 ) VALUES (%s, %s, %s, %s, %s)
                 """,
-                (current_time, build_success_rate, average_build_duration, tests_executed, test_failure_rate),
+                (
+                    current_time,
+                    build_success_rate,
+                    average_build_duration,
+                    tests_executed,
+                    test_failure_rate,
+                ),
             )
 
             conn.commit()

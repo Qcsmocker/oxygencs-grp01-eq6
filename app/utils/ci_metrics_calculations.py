@@ -2,6 +2,7 @@ from psycopg2 import DatabaseError
 from app.db.connection import get_db_connection, close_db_connection
 from app.utils.datetime_utils import get_current_timestamp
 
+
 class CIMetricsCalculator:
     """Class for calculating CI-related metrics from the database."""
 
@@ -42,7 +43,9 @@ class CIMetricsCalculator:
             if total_builds == 0:
                 return 0.0  # Avoid division by zero if no builds exist
 
-            return (successful_builds / total_builds) * 100.0  # Success rate as percentage
+            return (
+                successful_builds / total_builds
+            ) * 100.0  # Success rate as percentage
 
         except DatabaseError as db_err:
             print(f"Database error while calculating build success rate: {db_err}")
@@ -165,4 +168,3 @@ class CIMetricsCalculator:
             "tests_executed": tests_executed,
             "test_failure_rate": test_failure_rate,
         }
-
