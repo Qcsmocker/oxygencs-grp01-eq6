@@ -1,77 +1,57 @@
-import sys
-import os
+from datetime import datetime
+import pytest
+from app.db.connection import get_db_connection
+from app.queries.data_models import HvacAction
+from app.queries.hvac_action import insert_hvac_action
+from app.queries.sensor_data import insert_sensor_data
 
-# Add the project root directory to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+@pytest.fixture(scope="module")
+def db_connection():
+    # Setup database connection
+    connection = get_db_connection()
+    yield connection
+    connection.close()
 
+def test_hvac_action_insertion(db_connection):
+    cursor = db_connection.cursor()
 
-import unittest
-import json
-from app.db.connection import get_db_connection, close_db_connection
-from app.main import App  # Correct import for the App class
-from app.utils.datetime_utils import format_timestamp
+    # Step 1: Insert a sample sensor event first
+    sensor_timestamp = datetime.now()
+    sensor_temperature = 20.0
+    insert_sensor_data(cursor, sensor_timestamp, sensor_temperature)
+    cursor.execute("SELECT LASTVAL();")
+    sensor_event_id = cursor.fetchone()[0]
 
+    # Debugging: Verify sensor event was inserted
+    print(f"Inserted Sensor Event ID: {sensor_event_id}")
 
-class TestHVACDBInsertion(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # Establish a real connection to the database
-        cls.connection = get_db_connection()
-        cls.cursor = cls.connection.cursor()
+    # Step 2: Create a sample HVAC action instance
+    action_timestamp = datetime.now()
+    action_type = "TurnOnHeater"
+    temperature = 22.5
+    response_details = '{"Integration Test"}'
 
-    def test_hvac_data_insertion(self):
-        # Initialize the app
-        app = App()
+    hvac_action = HvacAction(
+        action_timestamp=action_timestamp,
+        action_type=action_type,
+        temperature=temperature,
+        sensor_event_id=sensor_event_id,  # Use the valid sensor_event_id
+        response_details=response_details
+    )
 
-        # Sample sensor data with formatted timestamp
-        timestamp = (
-            format_timestamp()
-        )  # Use the format_timestamp function from helpers.py
-        temperature = 999.9  # Use a distinct temperature to mark this as test data
-        sensor_event_id = app.save_sensor_event_to_db(timestamp, temperature)
+    # Step 3: Insert HVAC action into the database
+    insert_hvac_action(cursor, hvac_action)
+    db_connection.commit()
 
-        # Assert sensor_event_id was created
-        self.assertIsNotNone(
-            sensor_event_id, "Failed to insert sensor event into the database"
-        )
+    # Step 4: Check if the action was inserted
+    cursor.execute("SELECT COUNT(*) FROM hvac_actions WHERE action_type = %s", (action_type,))
+    result = cursor.fetchone()[0]
 
-        # Simulate an HVAC action based on the sensor data
-        action_type = "TurnOnAc" if temperature > app.t_max else "TurnOffAc"
+    assert result == 1, "HVAC action not inserted into the database."
 
-        # Create a response indicating this is test data
-        test_response_details = {
-            "status": "Test",
-            "description": "This is a test data entry",
-        }
-        response_details_json = json.dumps(test_response_details)
+    # Optional: Verify the action details in the database if needed
+    cursor.execute("SELECT * FROM hvac_actions WHERE action_type = %s", (action_type,))
+    action_record = cursor.fetchone()
+    assert action_record is not None, "No action record found in the database."
+    assert action_record[1] == action_timestamp, "Action timestamp does not match."
 
-        # Execute HVAC action with test data
-        action_timestamp = format_timestamp()  # Use the formatted timestamp
-        app.execute_hvac_action(action_type, temperature, sensor_event_id)
-
-        # Verify the HVAC data was inserted into the database with the test label
-        self.cursor.execute(
-            """
-            SELECT action_type, temperature, sensor_event_id, response_details
-            FROM hvac_actions
-            WHERE response_details->>'status' = 'Test';
-        """
-        )
-        result = self.cursor.fetchone()
-
-        # Ensure that the data exists and matches the expected test values
-        self.assertIsNotNone(result, "No test data found in the database.")
-        self.assertIn("Test", result[3], "Inserted data is not marked as test data.")
-        self.assertEqual(
-            result[1], 999.9, "The temperature does not match the test data value."
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        # Close the database connection after all tests are complete
-        cls.cursor.close()
-        close_db_connection(cls.connection)
-
-
-if __name__ == "__main__":
-    unittest.main()
