@@ -2,6 +2,7 @@
 Integration tests for verifying sensor data insertion into the database.
 """
 
+# pylint: disable=E0401
 from datetime import datetime
 from app.queries.sensor_data import insert_sensor_data
 

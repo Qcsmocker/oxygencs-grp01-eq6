@@ -24,11 +24,12 @@ repos:
           - pytz
           - pytest
           - signalrcore
-        entry: bash -c 'PYTHONPATH=. pylint "$@"' _
+        env:
+          PYTHONPATH: "."
+        entry: bash -c 'PYTHONPATH=. pylint "$@"' _ # Set PYTHONPATH here for pre-commit
 
   - repo: local
     hooks:
-      # Uncomment if you need unit tests to run as well
       # - id: run-unit-tests
       #   name: Run Unit Tests
       #   entry: pytest tests/unit_tests

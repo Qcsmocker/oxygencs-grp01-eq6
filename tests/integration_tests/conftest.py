@@ -2,6 +2,7 @@
 This module provides shared fixtures for integration tests.
 """
 
+# pylint: disable=E0401
 import pytest
 from app.db.connection import get_db_connection, close_db_connection
 

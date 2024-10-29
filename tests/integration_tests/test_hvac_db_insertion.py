@@ -2,6 +2,7 @@
 Integration tests for verifying HVAC action insertion into the database.
 """
 
+# pylint: disable=E0401
 from datetime import datetime
 from app.queries.data_models import HvacAction
 from app.queries.hvac_action import insert_hvac_action
