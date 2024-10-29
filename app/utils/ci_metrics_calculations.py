@@ -1,5 +1,12 @@
+"""
+Calculates Continuous Integration (CI) metrics from the database.
+This module provides several methods to calculate metrics such as build success rate,
+average build duration, and test failure rate over a specified time period.
+"""
+
 from psycopg2 import DatabaseError
-from app.db.connection import get_db_connection, close_db_connection
+
+from app.db.connection import close_db_connection, get_db_connection
 from app.utils.datetime_utils import get_current_timestamp
 
 
@@ -20,7 +27,8 @@ class CIMetricsCalculator:
                 """
                 SELECT COUNT(*)
                 FROM ci_metrics
-                WHERE build_success_rate >= 0 AND timestamp >= (CAST(%s AS TIMESTAMP) - INTERVAL '1 minute')
+                WHERE build_success_rate >= 0
+                AND timestamp >= (CAST(%s AS TIMESTAMP) - INTERVAL '1 minute')
                 """,
                 (current_time,),
             )
@@ -49,9 +57,6 @@ class CIMetricsCalculator:
 
         except DatabaseError as db_err:
             print(f"Database error while calculating build success rate: {db_err}")
-            return 0.0
-        except Exception as err:
-            print(f"Error calculating build success rate: {err}")
             return 0.0
 
     @staticmethod
@@ -82,9 +87,6 @@ class CIMetricsCalculator:
         except DatabaseError as db_err:
             print(f"Database error while calculating average build duration: {db_err}")
             return 0.0
-        except Exception as err:
-            print(f"Error calculating average build duration: {err}")
-            return 0.0
 
     @staticmethod
     def calculate_tests_executed():
@@ -114,9 +116,6 @@ class CIMetricsCalculator:
         except DatabaseError as db_err:
             print(f"Database error while calculating tests executed: {db_err}")
             return 0
-        except Exception as err:
-            print(f"Error calculating tests executed: {err}")
-            return 0
 
     @staticmethod
     def calculate_test_failure_rate():
@@ -145,9 +144,6 @@ class CIMetricsCalculator:
 
         except DatabaseError as db_err:
             print(f"Database error while calculating test failure rate: {db_err}")
-            return 0.0
-        except Exception as err:
-            print(f"Error calculating test failure rate: {err}")
             return 0.0
 
     @staticmethod

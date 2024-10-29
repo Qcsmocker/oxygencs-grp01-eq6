@@ -2,8 +2,6 @@
 This module provides database query functions for sensor data.
 """
 
-from app.queries.data_models import SensorData  # Updated import
-
 
 def insert_sensor_data(cursor, timestamp, temperature):
     """

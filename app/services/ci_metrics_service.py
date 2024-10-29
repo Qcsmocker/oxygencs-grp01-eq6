@@ -1,5 +1,12 @@
+"""
+This module provides a service for calculating and updating CI metrics
+in the database.
+"""
+
+# pylint: disable=E1121, R0903
 from psycopg2 import DatabaseError
-from app.db.connection import get_db_connection, close_db_connection
+
+from app.db.connection import close_db_connection, get_db_connection
 from app.utils.ci_metrics_calculations import CIMetricsCalculator
 from app.utils.datetime_utils import get_current_timestamp
 
@@ -52,12 +59,13 @@ class CIMetricsService:
             )
 
             conn.commit()
-            cursor.close()
-            close_db_connection(conn)
-
             print("CI Metrics updated successfully.")
 
         except DatabaseError as db_err:
             print(f"Database error while updating CI metrics: {db_err}")
-        except Exception as err:
+        except (TypeError, ValueError) as err:
             print(f"Error updating CI metrics: {err}")
+        finally:
+            if cursor:
+                cursor.close()
+            close_db_connection(conn)

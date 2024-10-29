@@ -6,16 +6,13 @@ Handles initialization, environment configurations, and the main loop for data p
 import os
 import threading
 import time
+
 from dotenv import load_dotenv
-import json
 
-from .services.database_service import DatabaseService
-
-from .api.sensor_hub_api import setup_sensor_hub
 from .api.hvac_control_api import send_action_to_hvac
-from .queries.data_models import HvacAction
+from .api.sensor_hub_api import setup_sensor_hub
 from .services.ci_metrics_service import CIMetricsCalculator
-from .utils.datetime_utils import get_current_timestamp
+from .services.database_service import DatabaseService  # Place all imports here
 
 # Set the PYTHONPATH
 os.environ["PYTHONPATH"] = os.path.abspath(
@@ -61,7 +58,7 @@ class App:
                 if ci_metrics:
                     DatabaseService.store_ci_metrics(ci_metrics)
                 print("CI Metrics updated successfully.")
-            except Exception as e:
+            except (ConnectionError, ValueError) as e:
                 print(f"Error calculating CI Metrics: {e}")
 
             time.sleep(60)  # Wait for 1 minute before the next update
@@ -147,36 +144,22 @@ class App:
                 self.config["ticks"],
             )
 
-            # Check if response is a valid JSON
-            if isinstance(response, (str, bytes)):
-                try:
-                    response_details = json.loads(response)
-                except json.JSONDecodeError:
-                    print(f"Error: Invalid JSON response received - {response}")
-                    return
-            else:
-                response_details = response  # Assume it's already a dict
-
-            # Create an instance of HvacAction
-            hvac_action = HvacAction(
-                action_timestamp=get_current_timestamp(),
-                action_type=action_type,
-                temperature=temperature,
-                sensor_event_id=sensor_event_id,
-                response_details=json.dumps(
-                    response_details
-                ),  # Ensure this is a string
-            )
-
             print(f"Performing HVAC Action: {action_type}")
 
-            # Save the HVAC action to the database using DatabaseService
-            DatabaseService.store_hvac_action(hvac_action)
+            # Store the HVAC action in the database
+            DatabaseService.store_hvac_action(
+                action_type, temperature, sensor_event_id, response
+            )
 
-        except Exception as e:
+        except (KeyError, ValueError) as e:
             print(f"Error performing HVAC action: {e}")
 
 
-if __name__ == "__main__":
+def run_app():
+    """Initialize and run the main application."""
     app = App()
     app.run()
+
+
+if __name__ == "__main__":
+    run_app()

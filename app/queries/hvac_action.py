@@ -2,7 +2,9 @@
 This module provides database query functions related to HVAC actions.
 """
 
-from app.queries.data_models import HvacAction  # Updated import
+import psycopg2
+
+from app.queries.data_models import HvacAction
 
 
 def insert_hvac_action(cursor, hvac_action: HvacAction):
@@ -27,5 +29,5 @@ def insert_hvac_action(cursor, hvac_action: HvacAction):
                 hvac_action.response_details,
             ),
         )
-    except Exception as e:
+    except psycopg2.DatabaseError as e:
         print(f"Error inserting HVAC action: {e}")

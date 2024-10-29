@@ -4,7 +4,7 @@
 
   // Exclude compiled Python cache files and directories from the file explorer
   "files.exclude": {
-      "**/__pycache__": true, 
-      "**/*.pyc": true         
+      "**/__pycache__": true,
+      "**/*.pyc": true
   }
 }

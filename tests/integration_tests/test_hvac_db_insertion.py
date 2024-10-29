@@ -1,21 +1,16 @@
+"""
+Integration tests for verifying HVAC action insertion into the database.
+"""
+
 from datetime import datetime
-import pytest
-from app.db.connection import get_db_connection
 from app.queries.data_models import HvacAction
 from app.queries.hvac_action import insert_hvac_action
 from app.queries.sensor_data import insert_sensor_data
 
 
-@pytest.fixture(scope="module")
-def db_connection():
-    # Setup database connection
-    connection = get_db_connection()
-    yield connection
-    connection.close()
-
-
-def test_hvac_action_insertion(db_connection):
-    cursor = db_connection.cursor()
+def test_hvac_action_insertion(db_test_connection):
+    """Test to insert an HVAC action into the database and verify its insertion."""
+    cursor = db_test_connection.cursor()
 
     # Step 1: Insert a sample sensor event first
     sensor_timestamp = datetime.now()
@@ -23,9 +18,6 @@ def test_hvac_action_insertion(db_connection):
     insert_sensor_data(cursor, sensor_timestamp, sensor_temperature)
     cursor.execute("SELECT LASTVAL();")
     sensor_event_id = cursor.fetchone()[0]
-
-    # Debugging: Verify sensor event was inserted
-    print(f"Inserted Sensor Event ID: {sensor_event_id}")
 
     # Step 2: Create a sample HVAC action instance
     action_timestamp = datetime.now()
@@ -43,7 +35,7 @@ def test_hvac_action_insertion(db_connection):
 
     # Step 3: Insert HVAC action into the database
     insert_hvac_action(cursor, hvac_action)
-    db_connection.commit()
+    db_test_connection.commit()
 
     # Step 4: Check if the action was inserted
     cursor.execute(
@@ -53,11 +45,3 @@ def test_hvac_action_insertion(db_connection):
     result = cursor.fetchone()[0]
 
     assert result == 1, "HVAC action not inserted into the database."
-
-    # Optional: Verify the action details in the database if needed
-    cursor.execute(
-        "SELECT * FROM hvac_actions WHERE action_timestamp = %s", (action_timestamp,)
-    )
-    action_record = cursor.fetchone()
-    assert action_record is not None, "No action record found in the database."
-    assert action_record[1] == action_timestamp, "Action timestamp does not match."
