@@ -1,4 +1,4 @@
-name: Test build and push
+name: Test, build and push
 
 on:
   workflow_dispatch:
