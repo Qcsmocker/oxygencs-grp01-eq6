@@ -28,4 +28,4 @@ jobs:
 
       - name: Run integration tests
         run: |
-          pytest tests/integration_tests
+          python -m unittest discover -s tests/integration_tests
