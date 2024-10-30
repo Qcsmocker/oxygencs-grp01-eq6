@@ -1,10 +1,14 @@
-import requests
+"""
+This module provides database query functions related to HVAC actions.
+"""
+
 import json
+
+import requests
 
 
 def send_action_to_hvac(host, token, action, ticks):
     """Send control action (TurnOnAc, TurnOnHeater) to HVAC."""
-    response = requests.get(f"{host}/api/hvac/{token}/{action}/{ticks}")
+    response = requests.get(f"{host}/api/hvac/{token}/{action}/{ticks}", timeout=10)
     details = json.loads(response.text)
-    print(details)
     return response.status_code, details
