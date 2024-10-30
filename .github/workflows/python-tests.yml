@@ -28,4 +28,5 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest
+          python -m unittest discover -s unit_tests  # Run unit tests
+          python -m unittest discover -s integration_tests  # Run integration tests
