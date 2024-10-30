@@ -6,7 +6,6 @@ Handles initialization, environment configurations, and the main loop for data p
 import os
 import threading
 import time
-
 from dotenv import load_dotenv
 
 from .api.hvac_control_api import send_action_to_hvac

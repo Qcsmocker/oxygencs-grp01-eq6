@@ -79,14 +79,7 @@ class DatabaseService:
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
-            insert_ci_metrics(
-                cursor,
-                ci_metrics["timestamp"],
-                ci_metrics["build_success_rate"],
-                ci_metrics["average_build_duration"],
-                ci_metrics["tests_executed"],
-                ci_metrics["test_failure_rate"],
-            )
+            insert_ci_metrics(cursor, ci_metrics)
             cursor.execute("SELECT LASTVAL();")
             conn.commit()
             print("CI Metrics inserted successfully.")
