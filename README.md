@@ -1,54 +1,54 @@
-# LOG-680 : Template for Oxygen-CS
+# LOG-680 : Modèle pour Oxygen-CS
 
-This Python application continuously monitors a sensor hub and manages HVAC (Heating, Ventilation, and Air Conditioning) system actions based on received sensor data.
+Cette application Python surveille en continu un hub de capteurs et gère les actions du système CVC (Chauffage, Ventilation et Climatisation) en fonction des données des capteurs reçues.
 
-It leverages `signalrcore` to maintain a real-time connection to the sensor hub and utilizes `requests` to send GET requests to a remote HVAC control endpoint.
+Elle utilise `signalrcore` pour maintenir une connexion en temps réel avec le hub de capteurs et utilise `requests` pour envoyer des requêtes GET à un point de contrôle CVC distant.
 
-This application uses `pipenv`, a tool that aims to bring the best of all packaging worlds to the Python world.
+Cette application utilise `pipenv`, un outil qui vise à rassembler le meilleur de tous les mondes de la gestion de paquets dans l'univers Python.
 
-## Requierements
+## Exigences
 
 - Python 3.8+
 - pipenv
 
-## Getting Started
+## Démarrage
 
-Install the project's dependencies :
+Installez les dépendances du projet :
 
 ```bash
 pipenv install
 ```
 
-## Setup
+## Configuration
 
-You need to setup the following variables inside the App class:
+Vous devez configurer les variables suivantes dans la classe App :
 
-- HOST: The host of the sensor hub and HVAC system.
-- TOKEN: The token for authenticating requests.
-- T_MAX: The maximum allowed temperature.
-- T_MIN: The minimum allowed temperature.
-- DATABASE_URL: The database connection URL.
+- HOST : L'hôte du hub de capteurs et du système CVC.
+- TOKEN : Le jeton pour l'authentification des requêtes.
+- T_MAX : La température maximale autorisée.
+- T_MIN : La température minimale autorisée.
+- DATABASE_URL : L'URL de connexion à la base de données.
 
-## Running the Program
+## Exécution du Programme
 
-After setup, you can start the program with the following command:
+Après la configuration, vous pouvez démarrer le programme avec la commande suivante :
 
 ```bash
 pipenv run start
 ```
 
-## Logging
+## Journalisation
 
-The application logs important events such as connection open/close and error events to help in troubleshooting.
+L'application enregistre des événements importants tels que l'ouverture/fermeture de la connexion et les événements d'erreur pour aider au dépannage.
 
-## To Implement
+## À Mettre en Œuvre
 
-There are placeholders in the code for sending events to a database and handling request exceptions. These sections should be completed as per the requirements of your specific application.
+Il y a des espaces réservés dans le code pour envoyer des événements à une base de données et gérer les exceptions de requêtes. Ces sections doivent être complétées selon les exigences de votre application spécifique.
 
-## License
+## Licence
 
 MIT
 
 ## Contact
 
-For more information, please feel free to contact the repository owner.
+Pour plus d'informations, n'hésitez pas à contacter le propriétaire du dépôt.
