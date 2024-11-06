@@ -156,8 +156,15 @@ class App:
 
 def run_app():
     """Initialize and run the main application."""
-    app = App()
-    app.run()
+    try:
+        app = App()
+        app.run()
+    except KeyboardInterrupt:
+        print("Shutting down gracefully...")
+        # Perform any cleanup if necessary
+    finally:
+        # Any final cleanup code goes here
+        print("App has stopped.")
 
 
 if __name__ == "__main__":

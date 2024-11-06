@@ -34,7 +34,9 @@ Vous devez configurer les variables suivantes dans la classe App :
 Après la configuration, vous pouvez démarrer le programme avec la commande suivante :
 
 ```bash
-pipenv run start
+docker build -t jfkfred/oxygencs . --progress=plain
+
+docker run --rm -it --name oxygencs --env-file .env  jfkfred/oxygencs
 ```
 
 ## Journalisation

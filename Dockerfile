@@ -25,7 +25,7 @@ FROM python:3.8-alpine
 
 WORKDIR /usr/app/
 
-COPY ./app .
+COPY ./app /usr/app/app
 COPY --from=builder /usr/app/.venv/ /usr/app/.venv/
 
 # Create a group and user
@@ -34,4 +34,4 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 # Tell docker that all future commands should run as the appuser user
 USER appuser
 
-CMD [ "./.venv/bin/python", "main.py" ]
+CMD [ "./.venv/bin/python", "-m", "app.main" ]
