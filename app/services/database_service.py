@@ -1,23 +1,21 @@
 """
-This module provides a service layer for handling database operations
-related to sensor data, HVAC actions, and CI metrics.
+This module provides service functions for interacting with the database,
+including storing sensor data, HVAC actions, and CI metrics.
 """
 
-# pylint: disable=E1121
 import json
-
 import psycopg2
-
-from ..db.connection import close_db_connection, get_db_connection
-from ..queries.ci_metrics import insert_ci_metrics
-from ..queries.data_models import HvacAction
-from ..queries.hvac_action import insert_hvac_action
-from ..queries.sensor_data import insert_sensor_data
-from ..utils.datetime_utils import get_current_timestamp
+from app.db.connection import close_db_connection, get_db_connection
+from app.queries.ci_metrics import insert_ci_metrics
+from app.queries.data_models import HvacAction
+from app.queries.hvac_action import insert_hvac_action
+from app.queries.sensor_data import insert_sensor_data
+from app.utils.datetime_utils import get_current_timestamp
 
 
 class DatabaseService:
-    """Service class for database operations."""
+    """Service class for database operations related to sensor data,
+    HVAC actions, and CI metrics."""
 
     @staticmethod
     def store_sensor_data(sensor_data):
