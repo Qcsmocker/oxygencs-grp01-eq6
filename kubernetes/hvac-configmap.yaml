@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hvac-config
+data:
+  T_MAX: "25"
+  T_MIN: "18"
+  HOST: "http://159.203.50.162"

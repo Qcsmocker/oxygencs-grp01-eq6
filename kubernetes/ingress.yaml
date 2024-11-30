@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grp01eq6-ingress # Replace with your name
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx # Replaces the deprecated annotation
+  rules:
+  - http:
+      paths:
+      - path: "/user01eq6/metrics(/|$)(.*)" # Simplify path
+        pathType: Prefix
+        backend:
+          service:
+            name: metrics-service # Replace with your service name
+            port:
+              number: 80 # Replace with your service port
