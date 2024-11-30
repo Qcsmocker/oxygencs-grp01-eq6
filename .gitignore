@@ -136,3 +136,5 @@ deploy_rsa.pub
 
 # Kubernetes config
 kubeconfig.yaml
+hvac-secret.yaml
+metrics-secret.yaml
