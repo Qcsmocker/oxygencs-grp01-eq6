@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: metrics-snapshot
+spec:
+  schedule: "*/30 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: metrics-snapshot
+            image: curlimages/curl:8.11.0
+            imagePullPolicy: IfNotPresent
+            args:          
+              - -vvv 
+              - --fail
+              - http://146.190.191.28/user01eq6/metrics/snapshot
+            resources:
+              requests:
+                memory: "25Mi"
+                cpu: "50m"
+              limits:
+                memory: "50Mi"
+                cpu: "100m"
+          restartPolicy: Never
+  concurrencyPolicy: Forbid     
+          
