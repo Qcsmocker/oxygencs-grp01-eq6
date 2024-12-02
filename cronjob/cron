@@ -1,0 +1,1 @@
+* * * * * /home/cronjob.sh http://metrics-api:3000/snapshot > /var/log/cron
