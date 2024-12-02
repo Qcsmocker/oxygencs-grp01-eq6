@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-controller
+  labels:
+    app: metrics-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metrics-controller
+  template:
+    metadata:
+      labels:
+        app: metrics-controller
+    spec:
+      containers:
+        - name: metrics-controller
+          image: jfkfred/metrics:latest
+          ports:
+            - containerPort: 5000
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: metrics-secrets
+          resources:
+            requests:
+              memory: "50Mi"
+              cpu: "100m"
+            limits:
+              memory: "100Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 15
