@@ -33,6 +33,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_PORT: ${{ secrets.DB_PORT }}
+          
         run: |
           pytest tests/integration_tests
 
@@ -43,5 +44,8 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_PORT: ${{ secrets.DB_PORT }}
+          T_MAX: ${{ secrets.T_MAX }}
+          T_MIN: ${{ secrets.T_MIN }}
+          PYTHONPATH: ${{ secrets.PYTHONPATH }}
         run: |
           pytest tests/unit_tests
