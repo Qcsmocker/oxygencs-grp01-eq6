@@ -14,7 +14,7 @@ from .services.ci_metrics_service import CIMetricsCalculator
 from .services.database_service import DatabaseService  # Place all imports here
 
 # Set the PYTHONPATH
-os.environ["PYTHONPATH"] = os.path.abspath(
+os.environ["."] = os.path.abspath(
     os.path.dirname(__file__)
 )  # This sets the PYTHONPATH to the current directory.
 
