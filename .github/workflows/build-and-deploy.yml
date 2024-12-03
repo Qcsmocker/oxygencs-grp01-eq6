@@ -54,14 +54,11 @@ jobs:
           docker push jfkfred/oxygencs:latest
           docker push jfkfred/oxygencs:${{ github.sha }}
 
-      - name: Set up kubeconfig
-        run: |
-          echo "${{ secrets.KUBECONFIG_64 }}" | base64 -d > kubeconfig
-          export KUBECONFIG=$PWD/kubeconfig
+      - name : set context
+        uses : Azure/k8s-set-context@v4
+        with:
+          kubeconfig: ${{ secrets.KUBECONFIG }}
 
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/hvac-controller hvac-controller=jfkfred/oxygencs:${{ github.sha }}
-
-      - name: Clean up kubeconfig
-        run: rm kubeconfig
