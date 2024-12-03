@@ -39,11 +39,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.8" # Use the correct Python version (adjust as necessary)
+
       - name: login to docker registry
         uses: docker/login-action@v3
         with:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
+
       - name: Build, tag, and push image to Docker Hub
         id: build-image
         run: |
@@ -51,3 +53,9 @@ jobs:
           docker tag jfkfred/oxygencs jfkfred/oxygencs:${{ github.sha }}
           docker push jfkfred/oxygencs:latest
           docker push jfkfred/oxygencs:${{ github.sha }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/hvac-controller hvac-controller=jfkfred/oxygencs:${{ github.sha }}
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
