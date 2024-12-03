@@ -28,6 +28,10 @@ kubectl apply -f kubernetes/metrics-deployment.yaml
 
 kubectl apply -f kubernetes/metrics-service.yaml
 
+--- CRONJOB ---
+
+kubectl apply -f kubernetes/cronjob.yaml
+
 ---
 
 kubectl apply -f kubernetes/ingress.yaml
