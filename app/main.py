@@ -28,7 +28,7 @@ class App:
         self.config = {
             "host": os.getenv("HOST"),
             "token": os.getenv("TOKEN"),
-            "t_max": float(os.getenv("T_MAX")),
+            "t_max": float(os.getenv("T_MAX")) + 10,
             "t_min": float(os.getenv("T_MIN")),
             "ticks": 10,
         }
