@@ -42,6 +42,58 @@ docker build -t jfkfred/oxygencs . --progress=plain
 docker run --rm -it --name oxygencs --env-file .env  jfkfred/oxygencs
 ```
 
+## Commande Kubernetes
+
+Tout d'abord, vous devez définir la variable d'environnement de Kubernetes, celle correspondant à KUBECONFIG
+
+```sh
+$env:KUBECONFIG = "C:[LOCAL_USER_FOLDER_PATH]\oxygencs-grp01-eq6\kubernetes\kubeconfig.yaml"
+```
+
+Ensuite, appliquez les fichiers pour le contrôleur HVAC.
+
+```bash
+kubectl apply -f kubernetes/hvac-configmap.yaml
+
+kubectl apply -f kubernetes/hvac-secret.yaml
+
+kubectl apply -f kubernetes/hvac-deployment.yaml
+```
+
+Par la suite, appliquez les fichiers pour configurer l'API des métriques.
+
+```bash
+kubectl apply -f kubernetes/metrics-secret.yaml
+
+kubectl apply -f kubernetes/metrics-deployment.yaml
+
+kubectl apply -f kubernetes/metrics-service.yaml
+
+kubectl apply -f kubernetes/ingress.yaml
+```
+
+Finalement, appliquez le CronJob.
+
+```bash
+kubectl apply -f kubernetes/cronjob.yaml
+```
+
+Vérifiez que tout a été correctement exécuté en affichant les informations. Vous pouvez également utiliser `describe` à la place de `get` pour obtenir plus de détails.
+
+```bash
+kubectl get secrets
+
+kubectl get pods
+
+kubectl get deployments
+
+kubectl get services
+
+kubectl get cronjob
+
+kubectl get jobs
+```
+
 ## Journalisation
 
 L'application enregistre des événements importants tels que l'ouverture/fermeture de la connexion et les événements d'erreur pour aider au dépannage.
